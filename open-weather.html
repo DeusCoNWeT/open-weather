@@ -1,241 +1,289 @@
-<link rel="import" href="../bower_components/polymer/polymer.html">
-<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<!--
+A polymer element for showing the current weather
+
+Example
+```
+<open-weather lat="48.1549108" lon="11.5418358" app-id="api-id-open-weather"
+name minmax conditiontext wind chump suntimes></open-weather>
+```
+@demo demo/index.html
+@hero hero.svg
+-->
+
+
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../iron-ajax/iron-ajax.html">
+<link rel="import" href="../iron-flex-layout/iron-flex-layout-classes.html">
 
 <dom-module id="open-weather">
-  <link rel="import" type="css" href="../bower_components/weather-icons/css/weather-icons.css">
+  <link rel="import" type="css" href="../weather-icons/css/weather-icons.min.css">
 
   <template>
-    <style>
-      :host {
-        width: 320px;
-        margin: 0 10px 10px 0;
-        color: white;
-        font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
-        font-weight: 300;
-        display: inline-block;
-      }
+  <style is="custom-style" include="iron-flex iron-flex-alignment">
+  :host {
+    position: relative;
+    width: 250px;
+    margin: 0 10px 10px 0;
+    color: #4ac7ff;
+    font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+    font-weight: 300;
+    display: inline-block;
+    background-color:#333;
+    padding:12px 5px;
+    border-radius: 3px;
+    text-shadow: 0px 0px 3px #3a3a3a;
+  }
+  :host > p {
+    margin:8px 0;
+  }
+  p {
+    margin:0;
+  }
+  .main {
+    padding:15px 10px;
+  }
+  .main .weather-icon{
+    font-size: 50px;
+    text-align: center;
+    margin:3px 0;
+    line-height: 70px;
+    color:#eee;
+    padding:5px;
+  }
+  .weather-text{
+    text-align: center;
+  }
 
-      .weather {
-        text-align: center;
-        padding: 1.5em 0 1em 0;
-      }
+  .minmax > .min,
+  .minmax > .max {
+    display: block;
+    margin:3px;
+    font-size:10px;
+  }
+  .min > span {
+    padding-left: 3px;
+  }
+  .weather > div {
+    margin-bottom: 1em;
+  }
+  .extrainfo {
+    margin:5px 0;
+  }
+  .extrainfo > p{
+    font-size:16px;
+  }
+  .main .temperature {
+    font-size:35px;
+    font-weight: bold;
+    margin:3px 0;
+  }
+  .main .humidity{
+    font-size:12px;
+    padding-left: 3px;
+  }
+  .humidity > .metric {
+    padding-left:11px;
+  }
+  .metric {
+    font-size:12px;
+  }
 
-      .weather > div {
-        margin-bottom: 1em;
-      }
+  .min, .max {
+    display: inline-block;
+  }
 
-      .temp-level-0 {
-        background-color: #001f3f;
-      }
+  .max {
+    margin-left: .5em;
+  }
+  .separator{
+    margin: 12px auto;
+    width: calc(100% - 20px);
+    width:-moz-calc(50% - 40px);
+    height: 1px;
+    background-color:#eee;
+  }
+  .conditiontext{
+    font-size: 14px;
+  }
+  .nextDay .info {
+    padding:5px;
+    float:left;
+    text-align: center;
+    width: 33%;
+  }
+  .info > .day{
+    font-size:12px;
+  }
+  .nextDay .weather-icon,
+  .nextDay .temperature{
+    font-size:12px;
+  }
+  </style>
+  <iron-ajax id="ajax" auto
+  url="http://api.openweathermap.org/data/2.5/forecast"
+  params="[[_weatherApiParams(lat, lon, units, language, appId)]]"
+  handle-as="json"
+  on-response="_weatherApiResponse">
+</iron-ajax>
 
-      .temp-level-1 {
-        background-color: #0074d9;
-      }
 
-      .temp-level-2 {
-        background-color: #00ABA9;
-      }
-
-      .temp-level-3 {
-        background-color: #3D9970;
-      }
-
-      .temp-level-4 {
-        background-color: #ff851b;
-      }
-
-      .temp-level-5 {
-        background-color: #ff4136;
-      }
-
-      .temp-level-6 {
-        background-color: #85144b;
-      }
-
-      .weather .info {
-        font-size: 1.5rem;
-      }
-
-      .condition-icon > i {
-        font-size: 8rem;
-        line-height: 12rem;
-      }
-
-      .current {
-        font-size: 4rem;
-      }
-
-      .min, .max {
-        display: inline-block;
-      }
-
-      .max {
-        margin-left: .5em;
-      }
-    </style>
-    <iron-ajax id="ajax" auto
-               url="http://api.openweathermap.org/data/2.5/weather"
-               params="[[_weatherApiParams(lat, lon, units, language, appId)]]"
-               handle-as="json"
-               on-response="_weatherApiResponse">
-    </iron-ajax>
-    <template is="dom-if" if=[[data]]>
-      <div class$="[[_weatherClass(data.tempLevel)]]">
-        <template is="dom-if" if="[[name]]">
-          <div class="info">[[data.name]]</div>
-        </template>
-        <div class="weather-condition">
-          <div class="condition-icon">
-            <i class="wi {{data.icon}}"></i>
-          </div>
-          <template is="dom-if" if="[[conditiontext]]">
-            <div class="conditiontext">[[data.conditiontext]]</div>
-          </template>
-        </div>
-        <div class="temperatures">
-          <div class="current"><span>[[data.currentTemp]]</span>°</div>
-          <template is="dom-if" if="[[minmax]]">
-            <div class="minmax">
-              <div class="min">
-                <i class="wi wi-down"></i> <span>[[data.minTemp]]</span>°
-              </div>
-              <div class="max">
-                <i class="wi wi-up"></i> <span>[[data.maxTemp]]</span>°
-              </div>
-            </div>
-          </template>
-        </div>
-        <template is="dom-id" if="[[wind]]">
-          <div class="wind">
-            <div class="speed">
-              <i class="wi wi-strong-wind"></i>
-              <span>[[data.windSpeed]]</span>
-              <span>[[speedUnit]]</span>
-            </div>
-            <div class="direction">
-              <i class="wi wi-wind-north-east"></i> <span>[[data.windDirection]]</span>
-            </div>
-          </div>
-        </template>
-        <template is="dom-if" if="[[suntimes]]">
-          <div class="sun">
-            <div class="sunrise">
-              <i class="wi wi-sunrise"></i> <span>[[data.sunrise]]</span>
-            </div>
-            <div class="sunset">
-              <i class="wi wi-sunset"></i> <span>[[data.sunset]]</span>
-            </div>
-          </div>
-        </template>
-        <template is="dom-if" if="[[chump]]">
-          <div class="chump">
-            <div class="cloudiness">
-              <i class="wi wi-cloudy"></i> <span>[[data.cloudiness]]</span>%
-            </div>
-            <div class="humidity">
-              <i class="wi wi-sprinkles"></i> <span>[[data.humidity]]</span>%
-            </div>
-            <div class="pressure">
-              <i class="wi wi-thermometer-internal"></i> <span>[[data.pressure]]</span> hPa
-            </div>
-          </div>
-        </template>
+<template is="dom-if" if="[[current_date]]">
+  <div class="horizontal layout main">
+    <p class$="wi weather-icon {{current_date.icon}}"></p>
+    <div class="vertical layout flex weather-text">
+      <p class="conditiontext">{{current_date.conditiontext}}</p>
+      <p class="temperature">{{current_date.currentTemp}}°{{temperatureUnit}}</p>
+      <p class="city">{{current_date.name}}</p>
+    </div>
+    <div class="minmax vertical layout">
+      <p class="min">
+        Min.
+        <span>{{current_date.minTemp}}°{{temperatureUnit}}</span>
+      </p>
+      <p class="max">
+        Max.
+        <span>{{current_date.maxTemp}}°{{temperatureUnit}}</span>
+      </p>
+      <p class="humidity wi wi-humidity"><span class="metric"> {{current_date.humidity}}%</span></p>
+    </div>
+  </div>
+  <div class="separator"></div>
+  <div class="nextDay horizontal layout center-justified">
+    <template is="dom-repeat" items="{{next_days}}">
+      <div class="info">
+        <p class="day">{{item.day}}</p>
+        <p class="temperature">
+        <span class$="wi weather-icon {{item.icon}}"></span>
+        {{item.currentTemp}}°{{temperatureUnit}}</p>
       </div>
     </template>
-  </template>
-  <script>
-    Polymer({
-      is: 'open-weather',
-      properties: {
-        lat: {},
-        lon: {},
-        appId: {},
-        name: {type: Boolean, value: false},
-        conditiontext: {type: Boolean, value: false},
-        imperial: {type: Boolean, value: false},
-        wind: {type: Boolean, value: false},
-        suntimes: {type: Boolean, value: false},
-        minmax: {type: Boolean, value: false},
-        chump: {type: Boolean, value: false},
-        language: {type: String, value: 'en'},
-        units: {type: String, value: 'metric'},
-        temperatureUnit: {type: String, value: 'C'},
-        speedUnit: {type: String, value: 'km/h'}
-      },
-      iconMapping: {
-        "01d": "wi-day-sunny",
-        "01n": "wi-night-clear",
-        "02d": "wi-day-cloudy",
-        "02n": "wi-night-cloudy",
-        "03d": "wi-cloudy",
-        "03n": "wi-cloudy",
-        "04d": "wi-cloudy",
-        "04n": "wi-cloudy",
-        "09d": "wi-showers",
-        "09n": "wi-showers",
-        "10d": "wi-day-rain",
-        "10n": "wi-night-rain",
-        "11d": "wi-thunderstorm",
-        "11n": "wi-thunderstorm",
-        "13d": "wi-snow",
-        "13n": "wi-snow",
-        "50d": "wi-fog",
-        "50n": "wi-fog"
-      },
-      windDirections: ["N", "NE", "E", "SE", "S", "SW", "W", "NW"],
-      data: null,
-      _weatherClass: function(tempLevel) {
-        return 'weather temp-level-' + tempLevel;
-      },
-      _weatherApiParams: function(lat, lon, units, language, appId) {
-        return {lat: lat, lon: lon, units: units, lang: language, appId: appId};
-      },
-      _weatherApiResponse: function(e) {
-        var res = e.detail.response;
-        var sunrise = new Date(res.sys.sunrise * 1000);
-        var sunset = new Date(res.sys.sunset * 1000);
+  </div>
 
-        function dateHelper(i) {
-          return i < 10 ? "0" + i : i;
-        }
+</template>
+</template>
+<script>
+Polymer({
+  is: 'open-weather',
+  properties: {
+    lat: {},
+    lon: {},
+    appId: {},
+    imperial: {type: Boolean, value: false},
+    language: {type: String, value: 'es'},
+    units: {type: String, value: 'metric'},
+    temperatureUnit: {type: String, value: 'C'},
+    speedUnit: {type: String, value: 'km/h'},
+    data: {type:Array, value: function(){return []}},
+    next_days: {type:Array, value: function(){return []}},
+  },
+  iconMapping: {
+    "01d": "wi-day-sunny",
+    "01n": "wi-night-clear",
+    "02d": "wi-day-cloudy",
+    "02n": "wi-night-cloudy",
+    "03d": "wi-cloudy",
+    "03n": "wi-cloudy",
+    "04d": "wi-cloudy",
+    "04n": "wi-cloudy",
+    "09d": "wi-showers",
+    "09n": "wi-showers",
+    "10d": "wi-day-rain",
+    "10n": "wi-night-rain",
+    "11d": "wi-thunderstorm",
+    "11n": "wi-thunderstorm",
+    "13d": "wi-snow",
+    "13n": "wi-snow",
+    "50d": "wi-fog",
+    "50n": "wi-fog"
+  },
+  windDirections: ["N", "NE", "E", "SE", "S", "SW", "W", "NW"],
+  _weatherClass: function(tempLevel) {
+    return 'weather temp-level-' + tempLevel;
+  },
+  _weatherApiParams: function(lat, lon, units, language, appId) {
+    return {lat: lat, lon: lon, units: units, lang: language, appId: appId};
+  },
+  _weatherApiResponse: function(e) {
+    var res = e.detail.response;
+    var list = res.list;
+    var days = {
+      es:['Dom','Lun','Mar','Mie','Jue','Vie','Sab'],
+      en:['Sun','Mon','Tue','Wed','thu','Fri','Sat'],
+      ru:['вос','пон','вто́','сре','чет','пя́т','суб'],
+      it:['Dom','Lun','Mar','Mer','Gio','Ven','Sab'],
+      uk:['Sun','Mon','Tue','Wed','thu','Fri','Sat'],
+      de:['Sun','Mon','Tue','Wed','thu','Fri','Sat'],
+      pt:['Sun','Mon','Tue','Wed','thu','Fri','Sat'],
+      ro:['Sun','Mon','Tue','Wed','thu','Fri','Sat'],
+      pl:['Sun','Mon','Tue','Wed','thu','Fri','Sat'],
+      fi:['Sun','Mon','Tue','Wed','thu','Fri','Sat'],
+      nl:['Sun','Mon','Tue','Wed','thu','Fri','Sat'],
+      fr:['Sun','Mon','Tue','Wed','thu','Fri','Sat'],
+      bg:['Sun','Mon','Tue','Wed','thu','Fri','Sat'],
+      sv:['Sun','Mon','Tue','Wed','thu','Fri','Sat'],
+      tr:['Sun','Mon','Tue','Wed','thu','Fri','Sat'],
+      ca:['Sun','Mon','Tue','Wed','thu','Fri','Sat']
 
-        function getTempLevel(temp, isImperial) {
-          if (isImperial) {
-            temp = (temp - 32) * (5 / 9)
-          }
-          var level = Math.round((temp + 8) / 8);
-          level = level < 0 ? 0 : level;
-          level = level > 6 ? 6 : level;
-          return level
-        }
-
-        this.data = {
-          icon: this.iconMapping[res.weather[0].icon],
-          conditiontext: res.weather[0].description,
-          name: res.name,
-          sunrise: dateHelper(sunrise.getHours()) + ":" + dateHelper(sunrise.getMinutes()),
-          sunset: dateHelper(sunset.getHours()) + ":" + dateHelper(sunset.getMinutes()),
-          currentTemp: Math.round(res.main.temp),
-          minTemp: Math.round(res.main.temp_min),
-          maxTemp: Math.round(res.main.temp_max),
-          windSpeed: res.wind.speed,
-          windDirection: this.windDirections[Math.round(res.wind.deg / 45) % 8],
-          cloudiness: res.clouds.all,
-          humidity: res.main.humidity,
-          pressure: res.main.pressure,
-          tempLevel: getTempLevel(res.main.temp, this.imperial)
-        };
-        this.fire('open-weather-load', {weather: this.data});
-      },
-      getCurrentLocation: function(position) {
-	      this.lat = position.coords.latitude;
-	      this.lon = position.coords.longitude;
-      },
-      ready: function() {
-	  if (typeof(this.lat) == "undefined" && typeof(this.lon) == "undefined") {
-	      navigator.geolocation.getCurrentPosition(this.getCurrentLocation.bind(this));
-	  }
+    }
+    function getTempLevel(temp, isImperial) {
+      if (isImperial) {
+        temp = (temp - 32) * (5 / 9)
       }
-    });
-  </script>
+      var level = Math.round((temp + 8) / 8);
+      level = level < 0 ? 0 : level;
+      level = level > 6 ? 6 : level;
+      return level
+    }
+    for (var i=0;i<list.length;i++) {
+      var dt = new Date(list[i].dt*1000);
+      var weather = {
+        icon: this.iconMapping[list[i].weather[0].icon],
+        conditiontext: list[i].weather[0].description,
+        name: res.city.name,
+        currentTemp: Math.round(list[i].main.temp),
+        minTemp: Math.round(list[i].main.temp_min),
+        maxTemp: Math.round(list[i].main.temp_max),
+        windSpeed:  list[i].wind.speed,
+        windMetric: this.imperial ? "Mi/H" : "M/h",
+        windDirection: this.windDirections[Math.round(list[i].wind.deg / 45) % 8],
+        cloudiness: list[i].clouds.all,
+        humidity: list[i].main.humidity,
+        pressure: list[i].main.pressure,
+        tempLevel: getTempLevel(list[i].main.temp, this.imperial),
+        dt:dt,
+        day: days[this.language][dt.getDay()]
+      };
+      this.push('data',weather);
+    }
+    this.current_date = this.data[0];
+    // next 3 days
+    for (var i=8;i<this.data.length && i<26;i=i+8){
+      this.push('next_days', this.data[i]);
+    }
+    this.fire('open-weather-load', {weather: this.data});
+  },
+  getCurrentLocation: function(position) {
+    this.lat = position.coords.latitude;
+    this.lon = position.coords.longitude;
+  },
+  ready: function() {
+    if (typeof(this.lat) == "undefined" && typeof(this.lon) == "undefined") {
+      navigator.geolocation.getCurrentPosition(this.getCurrentLocation.bind(this));
+    }
+    // this.custom_data= {detail:{response:""}};
+    // this.custom_data.detail.response= {"city":{"id":2643743,"name":"London","coord":{"lon":-0.12574,"lat":51.50853},"country":"GB","population":0,"sys":{"population":0}},"cod":"200","message":0.0055,"cnt":36,"list":[{"dt":1475236800,"main":{"temp":291.26,"temp_min":289.944,"temp_max":291.26,"pressure":1017.1,"sea_level":1024.54,"grnd_level":1017.1,"humidity":64,"temp_kf":1.32},"weather":[{"id":500,"main":"Rain","description":"light rain","icon":"10d"}],"clouds":{"all":24},"wind":{"speed":4.76,"deg":232},"rain":{"3h":0.03},"sys":{"pod":"d"},"dt_txt":"2016-09-30 12:00:00"},{"dt":1475247600,"main":{"temp":290.51,"temp_min":289.517,"temp_max":290.51,"pressure":1016.13,"sea_level":1023.58,"grnd_level":1016.13,"humidity":62,"temp_kf":0.99},"weather":[{"id":500,"main":"Rain","description":"light rain","icon":"10d"}],"clouds":{"all":100},"wind":{"speed":4.38,"deg":246.508},"rain":{"3h":0.11},"sys":{"pod":"d"},"dt_txt":"2016-09-30 15:00:00"},{"dt":1475258400,"main":{"temp":288.79,"temp_min":288.135,"temp_max":288.79,"pressure":1016.21,"sea_level":1023.77,"grnd_level":1016.21,"humidity":63,"temp_kf":0.66},"weather":[{"id":803,"main":"Clouds","description":"broken clouds","icon":"04n"}],"clouds":{"all":56},"wind":{"speed":3.14,"deg":255.503},"rain":{},"sys":{"pod":"n"},"dt_txt":"2016-09-30 18:00:00"},{"dt":1475269200,"main":{"temp":286.47,"temp_min":286.138,"temp_max":286.47,"pressure":1016.58,"sea_level":1024.16,"grnd_level":1016.58,"humidity":70,"temp_kf":0.33},"weather":[{"id":803,"main":"Clouds","description":"broken clouds","icon":"04n"}],"clouds":{"all":68},"wind":{"speed":2.49,"deg":253.504},"rain":{},"sys":{"pod":"n"},"dt_txt":"2016-09-30 21:00:00"},{"dt":1475280000,"main":{"temp":283.631,"temp_min":283.631,"temp_max":283.631,"pressure":1016.07,"sea_level":1023.68,"grnd_level":1016.07,"humidity":83,"temp_kf":0},"weather":[{"id":802,"main":"Clouds","description":"scattered clouds","icon":"03n"}],"clouds":{"all":48},"wind":{"speed":1.26,"deg":213.001},"rain":{},"sys":{"pod":"n"},"dt_txt":"2016-10-01 00:00:00"},{"dt":1475290800,"main":{"temp":282.579,"temp_min":282.579,"temp_max":282.579,"pressure":1015.02,"sea_level":1022.61,"grnd_level":1015.02,"humidity":100,"temp_kf":0},"weather":[{"id":500,"main":"Rain","description":"light rain","icon":"10n"}],"clouds":{"all":92},"wind":{"speed":1.98,"deg":180.502},"rain":{"3h":0.46},"sys":{"pod":"n"},"dt_txt":"2016-10-01 03:00:00"},{"dt":1475301600,"main":{"temp":283.008,"temp_min":283.008,"temp_max":283.008,"pressure":1014,"sea_level":1021.6,"grnd_level":1014,"humidity":100,"temp_kf":0},"weather":[{"id":500,"main":"Rain","description":"light rain","icon":"10n"}],"clouds":{"all":48},"wind":{"speed":2.31,"deg":141.504},"rain":{"3h":0.55},"sys":{"pod":"n"},"dt_txt":"2016-10-01 06:00:00"},{"dt":1475312400,"main":{"temp":285.927,"temp_min":285.927,"temp_max":285.927,"pressure":1013.09,"sea_level":1020.72,"grnd_level":1013.09,"humidity":88,"temp_kf":0},"weather":[{"id":500,"main":"Rain","description":"light rain","icon":"10d"}],"clouds":{"all":24},"wind":{"speed":2.58,"deg":140.503},"rain":{"3h":2.35},"sys":{"pod":"d"},"dt_txt":"2016-10-01 09:00:00"},{"dt":1475323200,"main":{"temp":285.991,"temp_min":285.991,"temp_max":285.991,"pressure":1011.89,"sea_level":1019.33,"grnd_level":1011.89,"humidity":96,"temp_kf":0},"weather":[{"id":500,"main":"Rain","description":"light rain","icon":"10d"}],"clouds":{"all":92},"wind":{"speed":4.42,"deg":163.002},"rain":{"3h":2.59},"sys":{"pod":"d"},"dt_txt":"2016-10-01 12:00:00"},{"dt":1475334000,"main":{"temp":284.84,"temp_min":284.84,"temp_max":284.84,"pressure":1010.24,"sea_level":1017.87,"grnd_level":1010.24,"humidity":99,"temp_kf":0},"weather":[{"id":501,"main":"Rain","description":"moderate rain","icon":"10d"}],"clouds":{"all":32},"wind":{"speed":2.77,"deg":207.501},"rain":{"3h":8.15},"sys":{"pod":"d"},"dt_txt":"2016-10-01 15:00:00"},{"dt":1475344800,"main":{"temp":283.427,"temp_min":283.427,"temp_max":283.427,"pressure":1011.1,"sea_level":1018.6,"grnd_level":1011.1,"humidity":100,"temp_kf":0},"weather":[{"id":500,"main":"Rain","description":"light rain","icon":"10n"}],"clouds":{"all":88},"wind":{"speed":3.4,"deg":235.004},"rain":{"3h":2.2},"sys":{"pod":"n"},"dt_txt":"2016-10-01 18:00:00"},{"dt":1475355600,"main":{"temp":282.27,"temp_min":282.27,"temp_max":282.27,"pressure":1011.93,"sea_level":1019.54,"grnd_level":1011.93,"humidity":97,"temp_kf":0},"weather":[{"id":500,"main":"Rain","description":"light rain","icon":"10n"}],"clouds":{"all":24},"wind":{"speed":2.84,"deg":241.507},"rain":{"3h":0.15},"sys":{"pod":"n"},"dt_txt":"2016-10-01 21:00:00"},{"dt":1475366400,"main":{"temp":280.926,"temp_min":280.926,"temp_max":280.926,"pressure":1012.27,"sea_level":1019.88,"grnd_level":1012.27,"humidity":99,"temp_kf":0},"weather":[{"id":800,"main":"Clear","description":"clear sky","icon":"01n"}],"clouds":{"all":0},"wind":{"speed":3.21,"deg":268.002},"rain":{},"sys":{"pod":"n"},"dt_txt":"2016-10-02 00:00:00"},{"dt":1475377200,"main":{"temp":282.948,"temp_min":282.948,"temp_max":282.948,"pressure":1012.26,"sea_level":1019.97,"grnd_level":1012.26,"humidity":96,"temp_kf":0},"weather":[{"id":500,"main":"Rain","description":"light rain","icon":"10n"}],"clouds":{"all":92},"wind":{"speed":4.76,"deg":300.501},"rain":{"3h":0.27},"sys":{"pod":"n"},"dt_txt":"2016-10-02 03:00:00"},{"dt":1475388000,"main":{"temp":283.669,"temp_min":283.669,"temp_max":283.669,"pressure":1013.61,"sea_level":1021.27,"grnd_level":1013.61,"humidity":98,"temp_kf":0},"weather":[{"id":500,"main":"Rain","description":"light rain","icon":"10n"}],"clouds":{"all":92},"wind":{"speed":6.58,"deg":325.502},"rain":{"3h":0.58},"sys":{"pod":"n"},"dt_txt":"2016-10-02 06:00:00"},{"dt":1475398800,"main":{"temp":284.702,"temp_min":284.702,"temp_max":284.702,"pressure":1015.98,"sea_level":1023.67,"grnd_level":1015.98,"humidity":97,"temp_kf":0},"weather":[{"id":500,"main":"Rain","description":"light rain","icon":"10d"}],"clouds":{"all":92},"wind":{"speed":5.77,"deg":336.005},"rain":{"3h":0.2},"sys":{"pod":"d"},"dt_txt":"2016-10-02 09:00:00"},{"dt":1475409600,"main":{"temp":286.06,"temp_min":286.06,"temp_max":286.06,"pressure":1018.3,"sea_level":1025.8,"grnd_level":1018.3,"humidity":96,"temp_kf":0},"weather":[{"id":500,"main":"Rain","description":"light rain","icon":"10d"}],"clouds":{"all":92},"wind":{"speed":3.87,"deg":332.5},"rain":{"3h":0.06},"sys":{"pod":"d"},"dt_txt":"2016-10-02 12:00:00"},{"dt":1475420400,"main":{"temp":286.974,"temp_min":286.974,"temp_max":286.974,"pressure":1019.8,"sea_level":1027.32,"grnd_level":1019.8,"humidity":94,"temp_kf":0},"weather":[{"id":500,"main":"Rain","description":"light rain","icon":"10d"}],"clouds":{"all":80},"wind":{"speed":2.77,"deg":320.5},"rain":{"3h":0.01},"sys":{"pod":"d"},"dt_txt":"2016-10-02 15:00:00"},{"dt":1475431200,"main":{"temp":285.654,"temp_min":285.654,"temp_max":285.654,"pressure":1022.18,"sea_level":1029.72,"grnd_level":1022.18,"humidity":95,"temp_kf":0},"weather":[{"id":804,"main":"Clouds","description":"overcast clouds","icon":"04n"}],"clouds":{"all":92},"wind":{"speed":2.11,"deg":276.502},"rain":{},"sys":{"pod":"n"},"dt_txt":"2016-10-02 18:00:00"},{"dt":1475442000,"main":{"temp":282.696,"temp_min":282.696,"temp_max":282.696,"pressure":1024.55,"sea_level":1032.28,"grnd_level":1024.55,"humidity":98,"temp_kf":0},"weather":[{"id":500,"main":"Rain","description":"light rain","icon":"10n"}],"clouds":{"all":0},"wind":{"speed":1.22,"deg":262.5},"rain":{"3h":0.01},"sys":{"pod":"n"},"dt_txt":"2016-10-02 21:00:00"},{"dt":1475452800,"main":{"temp":279.311,"temp_min":279.311,"temp_max":279.311,"pressure":1026.49,"sea_level":1034.32,"grnd_level":1026.49,"humidity":97,"temp_kf":0},"weather":[{"id":800,"main":"Clear","description":"clear sky","icon":"01n"}],"clouds":{"all":0},"wind":{"speed":1.18,"deg":233.502},"rain":{},"sys":{"pod":"n"},"dt_txt":"2016-10-03 00:00:00"},{"dt":1475463600,"main":{"temp":277.297,"temp_min":277.297,"temp_max":277.297,"pressure":1028.3,"sea_level":1036.09,"grnd_level":1028.3,"humidity":92,"temp_kf":0},"weather":[{"id":800,"main":"Clear","description":"clear sky","icon":"02n"}],"clouds":{"all":8},"wind":{"speed":1.21,"deg":212.503},"rain":{},"sys":{"pod":"n"},"dt_txt":"2016-10-03 03:00:00"},{"dt":1475474400,"main":{"temp":277.508,"temp_min":277.508,"temp_max":277.508,"pressure":1029.71,"sea_level":1037.49,"grnd_level":1029.71,"humidity":91,"temp_kf":0},"weather":[{"id":801,"main":"Clouds","description":"few clouds","icon":"02n"}],"clouds":{"all":20},"wind":{"speed":1.21,"deg":147.505},"rain":{},"sys":{"pod":"n"},"dt_txt":"2016-10-03 06:00:00"},{"dt":1475485200,"main":{"temp":283.869,"temp_min":283.869,"temp_max":283.869,"pressure":1031.79,"sea_level":1039.44,"grnd_level":1031.79,"humidity":100,"temp_kf":0},"weather":[{"id":500,"main":"Rain","description":"light rain","icon":"10d"}],"clouds":{"all":32},"wind":{"speed":1.77,"deg":143.006},"rain":{"3h":0.04},"sys":{"pod":"d"},"dt_txt":"2016-10-03 09:00:00"},{"dt":1475496000,"main":{"temp":289.206,"temp_min":289.206,"temp_max":289.206,"pressure":1032.57,"sea_level":1040.07,"grnd_level":1032.57,"humidity":89,"temp_kf":0},"weather":[{"id":500,"main":"Rain","description":"light rain","icon":"10d"}],"clouds":{"all":8},"wind":{"speed":2.52,"deg":151.507},"rain":{"3h":0.02},"sys":{"pod":"d"},"dt_txt":"2016-10-03 12:00:00"},{"dt":1475506800,"main":{"temp":290.097,"temp_min":290.097,"temp_max":290.097,"pressure":1032.18,"sea_level":1039.82,"grnd_level":1032.18,"humidity":74,"temp_kf":0},"weather":[{"id":800,"main":"Clear","description":"clear sky","icon":"02d"}],"clouds":{"all":8},"wind":{"speed":3.77,"deg":151.508},"rain":{},"sys":{"pod":"d"},"dt_txt":"2016-10-03 15:00:00"},{"dt":1475517600,"main":{"temp":287.098,"temp_min":287.098,"temp_max":287.098,"pressure":1032.83,"sea_level":1040.42,"grnd_level":1032.83,"humidity":72,"temp_kf":0},"weather":[{"id":800,"main":"Clear","description":"clear sky","icon":"01n"}],"clouds":{"all":0},"wind":{"speed":3.86,"deg":144.503},"rain":{},"sys":{"pod":"n"},"dt_txt":"2016-10-03 18:00:00"},{"dt":1475528400,"main":{"temp":285.548,"temp_min":285.548,"temp_max":285.548,"pressure":1033.6,"sea_level":1041.26,"grnd_level":1033.6,"humidity":90,"temp_kf":0},"weather":[{"id":802,"main":"Clouds","description":"scattered clouds","icon":"03n"}],"clouds":{"all":32},"wind":{"speed":3.76,"deg":133.502},"rain":{},"sys":{"pod":"n"},"dt_txt":"2016-10-03 21:00:00"},{"dt":1475539200,"main":{"temp":286.233,"temp_min":286.233,"temp_max":286.233,"pressure":1034.09,"sea_level":1041.68,"grnd_level":1034.09,"humidity":86,"temp_kf":0},"weather":[{"id":803,"main":"Clouds","description":"broken clouds","icon":"04n"}],"clouds":{"all":56},"wind":{"speed":4.38,"deg":144.002},"rain":{},"sys":{"pod":"n"},"dt_txt":"2016-10-04 00:00:00"},{"dt":1475550000,"main":{"temp":286.556,"temp_min":286.556,"temp_max":286.556,"pressure":1034.19,"sea_level":1041.78,"grnd_level":1034.19,"humidity":86,"temp_kf":0},"weather":[{"id":803,"main":"Clouds","description":"broken clouds","icon":"04n"}],"clouds":{"all":76},"wind":{"speed":4.36,"deg":148},"rain":{},"sys":{"pod":"n"},"dt_txt":"2016-10-04 03:00:00"},{"dt":1475560800,"main":{"temp":286.545,"temp_min":286.545,"temp_max":286.545,"pressure":1034.68,"sea_level":1042.27,"grnd_level":1034.68,"humidity":84,"temp_kf":0},"weather":[{"id":803,"main":"Clouds","description":"broken clouds","icon":"04n"}],"clouds":{"all":80},"wind":{"speed":4.11,"deg":150.505},"rain":{},"sys":{"pod":"n"},"dt_txt":"2016-10-04 06:00:00"},{"dt":1475571600,"main":{"temp":288.715,"temp_min":288.715,"temp_max":288.715,"pressure":1035.52,"sea_level":1043.11,"grnd_level":1035.52,"humidity":76,"temp_kf":0},"weather":[{"id":803,"main":"Clouds","description":"broken clouds","icon":"04d"}],"clouds":{"all":64},"wind":{"speed":4.11,"deg":150.504},"rain":{},"sys":{"pod":"d"},"dt_txt":"2016-10-04 09:00:00"},{"dt":1475582400,"main":{"temp":290.823,"temp_min":290.823,"temp_max":290.823,"pressure":1035.24,"sea_level":1042.92,"grnd_level":1035.24,"humidity":71,"temp_kf":0},"weather":[{"id":802,"main":"Clouds","description":"scattered clouds","icon":"03d"}],"clouds":{"all":48},"wind":{"speed":4.37,"deg":144.503},"rain":{},"sys":{"pod":"d"},"dt_txt":"2016-10-04 12:00:00"},{"dt":1475593200,"main":{"temp":290.769,"temp_min":290.769,"temp_max":290.769,"pressure":1034.36,"sea_level":1041.92,"grnd_level":1034.36,"humidity":64,"temp_kf":0},"weather":[{"id":802,"main":"Clouds","description":"scattered clouds","icon":"03d"}],"clouds":{"all":48},"wind":{"speed":4.12,"deg":144},"rain":{},"sys":{"pod":"d"},"dt_txt":"2016-10-04 15:00:00"},{"dt":1475604000,"main":{"temp":287.924,"temp_min":287.924,"temp_max":287.924,"pressure":1034.13,"sea_level":1041.73,"grnd_level":1034.13,"humidity":64,"temp_kf":0},"weather":[{"id":802,"main":"Clouds","description":"scattered clouds","icon":"03n"}],"clouds":{"all":36},"wind":{"speed":3.36,"deg":132.004},"rain":{},"sys":{"pod":"n"},"dt_txt":"2016-10-04 18:00:00"},{"dt":1475614800,"main":{"temp":286.018,"temp_min":286.018,"temp_max":286.018,"pressure":1034.06,"sea_level":1041.73,"grnd_level":1034.06,"humidity":81,"temp_kf":0},"weather":[{"id":802,"main":"Clouds","description":"scattered clouds","icon":"03n"}],"clouds":{"all":48},"wind":{"speed":2.97,"deg":123.501},"rain":{},"sys":{"pod":"n"},"dt_txt":"2016-10-04 21:00:00"}]}
+    // this._weatherApiResponse(this.custom_data);
+  }
+});
+</script>
 </dom-module>
