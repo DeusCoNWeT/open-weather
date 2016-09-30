@@ -1,21 +1,21 @@
-# &lt;current-weather&gt;
+# &lt;open-weather&gt;
 
 > A [Polymer](http://www.polymer-project.org/) element for getting and displaying the current weather at a given location.
 > Uses [openweathermap](http://openweathermap.org/API) and [Weather Icons](https://github.com/erikflowers/weather-icons/).
 
 ## Demo
 
-[Check it live!](http://dotch.github.io/current-weather)
+[Check it live!](http://dotch.github.io/open-weather)
 
 ## Install
 
 Install the component using [Bower](http://bower.io/):
 
 ```sh
-$ bower install current-weather --save
+$ bower install open-weather --save
 ```
 
-Or [download as ZIP](https://github.com/dotch/current-weather/archive/master.zip).
+Or [download as ZIP](https://github.com/dotch/open-weather/archive/master.zip).
 
 ## Usage
 
@@ -28,14 +28,14 @@ Or [download as ZIP](https://github.com/dotch/current-weather/archive/master.zip
 2. Import Custom Element:
 
     ```html
-    <link rel="import" href="bower_components/current-weather/dist/current-weather.html">
+    <link rel="import" href="bower_components/open-weather/dist/open-weather.html">
     ```
 
 3. Start using it!
 
     ```html
-    <current-weather lat="37.3860500" lon="-122.0838500" units="imperial" app-id="your-open-weather-map-app-id"></current-weather>
-    <current-weather lat="49.27826" lon="11.45929" units="metric" app-id="your-open-weather-map-app-id"></current-weather>
+    <open-weather lat="37.3860500" lon="-122.0838500" units="imperial" app-id="your-open-weather-map-app-id"></open-weather>
+    <open-weather lat="49.27826" lon="11.45929" units="metric" app-id="your-open-weather-map-app-id"></open-weather>
     ```
 
 ## Options
@@ -62,7 +62,7 @@ If `lat` and `lon` are not provided, it will use the geolocation of your browser
 
 Event                    | Description
 ---                      | ---
-`current-weather-loaded` | Triggers when weather data is loaded
+`open-weather-loaded` | Triggers when weather data is loaded
 
 ## Development
 

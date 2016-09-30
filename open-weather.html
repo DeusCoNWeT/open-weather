@@ -1,8 +1,8 @@
-<link rel="import" href="../../polymer/polymer.html">
-<link rel="import" href="../../iron-ajax/iron-ajax.html">
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
 
-<dom-module id="current-weather">
-  <link rel="import" type="css" href="../../weather-icons/css/weather-icons.css">
+<dom-module id="open-weather">
+  <link rel="import" type="css" href="../bower_components/weather-icons/css/weather-icons.css">
 
   <template>
     <style>
@@ -76,7 +76,7 @@
     <iron-ajax id="ajax" auto
                url="http://api.openweathermap.org/data/2.5/weather"
                params="[[_weatherApiParams(lat, lon, units, language, appId)]]"
-               handleAs="json"
+               handle-as="json"
                on-response="_weatherApiResponse">
     </iron-ajax>
     <template is="dom-if" if=[[data]]>
@@ -145,7 +145,7 @@
   </template>
   <script>
     Polymer({
-      is: 'current-weather',
+      is: 'open-weather',
       properties: {
         lat: {},
         lon: {},
@@ -225,7 +225,16 @@
           pressure: res.main.pressure,
           tempLevel: getTempLevel(res.main.temp, this.imperial)
         };
-        this.fire('current-weather-load', {weather: this.data});
+        this.fire('open-weather-load', {weather: this.data});
+      },
+      getCurrentLocation: function(position) {
+	      this.lat = position.coords.latitude;
+	      this.lon = position.coords.longitude;
+      },
+      ready: function() {
+	  if (typeof(this.lat) == "undefined" && typeof(this.lon) == "undefined") {
+	      navigator.geolocation.getCurrentPosition(this.getCurrentLocation.bind(this));
+	  }
       }
     });
   </script>
