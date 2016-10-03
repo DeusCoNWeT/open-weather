@@ -148,8 +148,10 @@ name minmax conditiontext wind chump suntimes></open-weather>
     padding:0 32px;
     width: 55px;
     height: 55px;
+    text-shadow: none;
   }
   .loading {
+    visibility: hidden;
     position: absolute;
     opacity: 0;
     top:0;
@@ -162,6 +164,7 @@ name minmax conditiontext wind chump suntimes></open-weather>
     transition: 0.3s all linear;
   }
   .loading[active] {
+    visibility: visible;
     opacity: 1;
     transition: 0.3s all linear;
   }
@@ -256,7 +259,7 @@ Polymer({
   iconMappingPretty: {
     "01d": "http://i.imgur.com/8emVn0q.png",
     "01n": "http://i.imgur.com/bFgsaOB.png",
-    "02d": "http://i.imgur.com/523PFSf.png",
+    "02d": "http://i.imgur.com/VzKmO0h.png",
     "02n": "http://i.imgur.com/BEiKkyQ.png",
     "03d": "http://i.imgur.com/523PFSf.png",
     "03n": "http://i.imgur.com/523PFSf.png",
