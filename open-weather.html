@@ -16,6 +16,9 @@ Example
 <open-weather lat="48.1549108" lon="11.5418358" app-id="api-id-open-weather"
 name minmax conditiontext wind chump suntimes></open-weather>
 ```
+
+If lat and lon are no defined. it will try to get your location
+
 @demo demo/index.html
 @hero hero.svg
 -->
@@ -411,11 +414,20 @@ Polymer({
     this.fire('open-weather-load', {weather: this.data});
   },
   /**
-    * Update data
+  * Update data
   */
   refresh: function(){
     this._loading=true;
     this.$.ajax.generateRequest();
+  },
+  ready: function() {
+    var getCurrentLocation= function(position) {
+      this.lat = position.coords.latitude;
+      this.lon = position.coords.longitude;
+    }
+    if (typeof(this.lat) == "undefined" && typeof(this.lon) == "undefined") {
+      navigator.geolocation.getCurrentPosition(getCurrentLocation.bind(this));
+    }
   }
 });
 </script>
