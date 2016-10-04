@@ -5,17 +5,12 @@
 
 ## Demo
 
-[Check it live!](http://dotch.github.io/open-weather)
+[Check it live!](https://mortega5.github.io/open-weather)
 
 ## Install
 
 Install the component using [Bower](http://bower.io/):
 
-```sh
-$ bower install open-weather --save
-```
-
-Or [download as ZIP](https://github.com/dotch/open-weather/archive/master.zip).
 
 ## Usage
 
@@ -46,12 +41,6 @@ Attribute       | Options     | Default      | Description
 `long`          | *double*    | ``           | The longitude of the desired location
 `app-id`        | *string*    | ``           | Open weather map app id
 `imperial`      | *boolean*   | `false`      | use imperial instead of metric units
-`wind`          | *boolean*   | `false`      | show wind information
-`suntimes`      | *boolean*   | `false`      | show sunrise und sunset times
-`minmax`        | *boolean*   | `false`      | show min and max temperature, use with care, it seems to be not the daily min and max-temp
-`chump`         | *boolean*   | `false`      | show cloudiness humidity and pressure
-`name`          | *boolean*   | `false`      | show the name of the requested location, e.g. Paris
-`conditiontext` | *boolean*   | `false`      | show the weathercondition in text form e.g. "clouded"
 `language`      | *string*    | `en`         | specify the language for the conditiontext e.g. "de", possible values: en, ru, it, sp, ua, de, pt, ro, pl, fi, nl, fr, bg, se, zh_tw, zh_cn, tr
 
 Note:
