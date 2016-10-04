@@ -34,6 +34,8 @@ name minmax conditiontext wind chump suntimes></open-weather>
   :host {
     position: relative;
     width: 250px;
+    min-width:250px;
+    min-height: 200px;
     color: #eee;
     font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
     font-weight: 300;
@@ -123,9 +125,12 @@ name minmax conditiontext wind chump suntimes></open-weather>
   }
   .nextDay .info {
     padding:5px;
-    float:left;
+    width: 25%;
+    min-width: 50px;
     text-align: center;
-    width: 33%;
+    box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
   }
   .info:first-child{
     border:none;
@@ -145,7 +150,6 @@ name minmax conditiontext wind chump suntimes></open-weather>
     font-size:10px;
   }
   .prettyIcon{
-    padding:0 32px;
     width: 55px;
     height: 55px;
     text-shadow: none;
@@ -185,18 +189,20 @@ name minmax conditiontext wind chump suntimes></open-weather>
 <template is="dom-if" if="[[current_date]]">
   <div class="loading" id="loading" active$="{{loading}}">
   </div>
-  <div class="horizontal layout center title">
+  <div class="horizontal layout center title wrap">
     <p class="city flex">{{current_date.name}}</p>
     <iron-icon class="refresh" icon="refresh" on-click="refresh"></iron-icon>
   </div>
-  <div class="horizontal center layout main">
+  <div class="horizontal center layout main wrap">
     <div class="vertical layout weather-text">
-      <p class="temperature"><span>{{current_date.currentTemp}}</span>°{{temperatureUnit}}</p>
+      <p class="temperature"><span>{{current_date.currentTemp}}</span>°{{current_date.temperatureUnit}}</p>
       <p class="minmax">
         {{current_date.minTemp}}° / {{current_date.maxTemp}}°
       </p>
     </div>
-    <img src$="{{current_date.prettyIcon}}" class="flex prettyIcon">
+    <div class="flex horizontal layout center-center">
+      <img src$="{{current_date.prettyIcon}}" class="prettyIcon">
+    </div>
     <div class="right-info vertical layout">
       <p class="current_time">{{current_date.current_time}}</p>
       <p class="date">{{current_date.current_date}}</p>
@@ -204,7 +210,7 @@ name minmax conditiontext wind chump suntimes></open-weather>
     </div>
   </div>
   <div class="separator"></div>
-  <div class="nextDay horizontal layout center-justified">
+  <div class="nextDay horizontal layout center-justified wrap">
     <template is="dom-repeat" items="{{next_days}}">
       <div class="info">
         <p class="day">{{item.day}}</p>
@@ -220,23 +226,46 @@ name minmax conditiontext wind chump suntimes></open-weather>
 Polymer({
   is: 'open-weather',
   properties: {
+    /**
+    * City latitude
+    */
     lat: {type:Number},
+    /**
+    * City longitude
+    */
     lon: {type:Number},
+    /**
+    * Open weather ID
+    */
     appId: {},
+    /**
+    * Imperial values for data
+    **/
     imperial: {type: Boolean, value: false},
+    /**
+    * Set the language of dates
+    **/
     language: {type: String, value: 'es'},
+    /**
+    * Set units of data
+    **/
     units: {type: String, value: 'metric'},
-    temperatureUnit: {type: String, value: 'C'},
-    speedUnit: {type: String, value: 'km/h'},
+    /**
+    * All data from api. (5 days, 8 values for day)
+    */
     data: {type:Array, value: function(){return []}},
+    /**
+    * Data for next 4 days
+    */
     next_days: {type:Array, value: function(){return []}},
+
     weather_params:{type:Object,computed:'_weatherApiParams(lat, lon, units, language, appId)',observer:'_weatherParamsChanged'},
-    loading:{
+    _loading:{
       type:Boolean,
       value:true
     }
   },
-  iconMapping: {
+  _iconMapping: {
     "01d": "wi-day-sunny",
     "01n": "wi-night-clear",
     "02d": "wi-day-cloudy",
@@ -256,7 +285,7 @@ Polymer({
     "50d": "wi-fog",
     "50n": "wi-fog"
   },
-  iconMappingPretty: {
+  _iconMappingPretty: {
     "01d": "http://i.imgur.com/8emVn0q.png",
     "01n": "http://i.imgur.com/bFgsaOB.png",
     "02d": "http://i.imgur.com/VzKmO0h.png",
@@ -276,11 +305,13 @@ Polymer({
     "50d": "http://i.imgur.com/TlecD8p.png",
     "50n": "http://i.imgur.com/TlecD8p.png"
   },
-  windDirections: ["N", "NE", "E", "SE", "S", "SW", "W", "NW"],
+  _windDirections: ["N", "NE", "E", "SE", "S", "SW", "W", "NW"],
   // Observers
   _weatherParamsChanged: function(){
-      this.loading = true;
+    if (this.lat && this.lon && this.units && this.language && this.appId){
+      this._loading = true;
       this.$.ajax.generateRequest();
+    }
   },
   _weatherClass: function(tempLevel) {
     return 'weather temp-level-' + tempLevel;
@@ -289,7 +320,7 @@ Polymer({
     return {lat: lat, lon: lon, units: units, lang: language, appId: appId};
   },
   _weatherApiResponse: function(e) {
-    this.loading = false;
+    this._loading = false;
     var res = e.detail.response;
     if (res.cod && res.cod === "404"){
       console.log('error!');
@@ -349,7 +380,7 @@ Polymer({
       var init = Math.floor(i/8)*8;
       var minmax = getMinMax(list.slice(init,8+init));
       var weather = {
-        icon: this.iconMapping[list[i].weather[0].icon],
+        icon: this._iconMapping[list[i].weather[0].icon],
         conditiontext: list[i].weather[0].description,
         name: res.city.name,
         currentTemp: Math.round(list[i].main.temp),
@@ -357,17 +388,18 @@ Polymer({
         maxTemp: minmax.max,
         windSpeed:  list[i].wind.speed,
         windMetric: this.imperial ? "Mi/H" : "M/h",
-        windDirection: this.windDirections[Math.round(list[i].wind.deg / 45) % 8],
+        windDirection: this._windDirections[Math.round(list[i].wind.deg / 45) % 8],
         cloudiness: list[i].clouds.all,
         humidity: list[i].main.humidity,
         pressure: list[i].main.pressure,
+        temperatureUnit: this.imperial ? 'F':'C',
         tempLevel: getTempLevel(list[i].main.temp, this.imperial),
         dt:dt,
         day: days[this.language][dt.getDay()],
         current_time: current_time,
         current_date: day + '/' + month + '/' + year,
         day: days[this.language][dt.getDay()],
-        prettyIcon: this.iconMappingPretty[list[i].weather[0].icon]
+        prettyIcon: this._iconMappingPretty[list[i].weather[0].icon]
       };
       this.push('data',weather);
     }
@@ -378,12 +410,11 @@ Polymer({
     }
     this.fire('open-weather-load', {weather: this.data});
   },
-  getCurrentLocation: function(position) {
-    this.lat = position.coords.latitude;
-    this.lon = position.coords.longitude;
-  },
+  /**
+    * Update data
+  */
   refresh: function(){
-    this.loading=true;
+    this._loading=true;
     this.$.ajax.generateRequest();
   }
 });
