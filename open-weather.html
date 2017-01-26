@@ -259,7 +259,8 @@ If lat and lon are no defined. it will try to get your location
         type: Number,
         value: 2000,
         reflectToAttribute: true
-      }
+      },
+      refresh_time:{type:Number,value:60000}
     },
     _iconMapping: {
       "01d": "wi-day-sunny",
@@ -420,14 +421,18 @@ If lat and lon are no defined. it will try to get your location
       this._loading = true;
       this.$.ajax.generateRequest();
     },
-    ready: function () {
-      var getCurrentLocation = function (position) {
+    attached: function() {
+      this._interval = window.setInterval(this.refresh.bind(this),this.refresh_time);
+      var getCurrentLocation= function(position) {
         this.lat = position.coords.latitude;
         this.lon = position.coords.longitude;
       }
-      if (typeof (this.lat) == "undefined" && typeof (this.lon) == "undefined") {
+      if (typeof(this.lat) == "undefined" && typeof(this.lon) == "undefined") {
         navigator.geolocation.getCurrentPosition(getCurrentLocation.bind(this));
       }
+    },
+    detached: function(){
+      if(this._interval) window.clearInterval(this._interval)
     }
   });
 </script>
