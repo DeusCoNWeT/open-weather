@@ -255,7 +255,8 @@ Polymer({
     _loading:{
       type:Boolean,
       value:true
-    }
+    },
+    refresh_time:{type:Number,value:60000}
   },
   _iconMapping: {
     "01d": "wi-day-sunny",
@@ -409,7 +410,9 @@ Polymer({
     this._loading=true;
     this.$.ajax.generateRequest();
   },
-  ready: function() {
+  attached: function() {
+    this._interval = window.setInterval(this.refresh.bind(this),this.refresh_time);
+
     var getCurrentLocation= function(position) {
       this.lat = position.coords.latitude;
       this.lon = position.coords.longitude;
@@ -417,6 +420,9 @@ Polymer({
     if (typeof(this.lat) == "undefined" && typeof(this.lon) == "undefined") {
       navigator.geolocation.getCurrentPosition(getCurrentLocation.bind(this));
     }
+  },
+  detached: function(){
+    if(this._interval) window.clearInterval(this._interval)
   }
 });
 </script>
