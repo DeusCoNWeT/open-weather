@@ -405,7 +405,7 @@ If lat and lon are no defined. it will try to get your location
         var month = dt.getMonth() + 1;
         var year = dt.getYear();
         var init = Math.floor(i / 8) * 8;
-        var minmax = getMinMax(list.slice(init, 8 + init));
+        var minmax = getMinMax(dt,list);
         var weather = {
           icon: this._iconMapping[list[i].weather[0].icon],
           conditiontext: list[i].weather[0].description,
