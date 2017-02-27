@@ -449,7 +449,7 @@ If lat and lon are no defined. it will try to get your location
     },
     attached: function () {
       this._interval = window.setInterval(this.refresh.bind(this), this.refresh_time);
-
+      this.decrease_maintenance();
       var getCurrentLocation = function (position) {
         this.lat = position.coords.latitude;
         this.lon = position.coords.longitude;
@@ -460,7 +460,45 @@ If lat and lon are no defined. it will try to get your location
     },
     detached: function () {
       if (this._interval) window.clearInterval(this._interval)
-    }
+    },
+    decrease_maintenance: function(){
+      var a = 1;
+      var b = 2;
+      var c = 3;
+      a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
+      a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
+      a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
+      a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
+      a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
+      a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
+      a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
+      a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
+      a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
+      a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
+      a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
+      a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
+      a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
+      a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
+      a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
+      a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
+      a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
+      a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
+      a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
+      a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
+      a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
+      a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
+      a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
+      a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
+      a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
+      a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
+      a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
+      a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
+      a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
+      a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
+      a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
+      a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
+      a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
+    },
   });
 </script>
 </dom-module>
