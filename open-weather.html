@@ -171,6 +171,34 @@ If lat and lon are no defined. it will try to get your location
     visibility: visible;
     display: inline-flex !important;
   }
+  .animated {
+    -webkit-animation-duration: 2s;
+    animation-duration: 2s;
+    -webkit-animation-fill-mode: both;
+    animation-fill-mode: both;
+  }
+  @-webkit-keyframes fadeIn {
+    0% {opacity: 0;}
+    10%{opacity: 0.1;}
+    60%{opacity: 0.1;}
+    90%{opacity:0.3;}
+    100%{opacity:1}
+    
+    
+  }
+
+  @keyframes fadeIn {
+    0% {opacity: 0;}
+    10%{opacity: 0.1;}
+    60%{opacity:0.1;}
+    90%{opacity: 0.1;}
+    100%{opacity:1}
+  }
+
+  .fadeIn {
+    -webkit-animation-name: fadeIn;
+    animation-name: fadeIn;
+  }
   </style>
   <iron-ajax id="ajax"  url="https://centauro.ls.fi.upm.es:4444/weather"
   params="{{weather_params}}"
@@ -179,12 +207,12 @@ If lat and lon are no defined. it will try to get your location
 </iron-ajax>
 
 
-<template is="dom-if" if="[[current_date]]">
-  <div class="horizontal layout center title wrap">
+<template is="dom-if" if="[[current_date]]" id="mainTemplate" restamp>
+  <div class="horizontal layout center title wrap animated fadeIn">
     <p class="city flex">{{current_date.name}}</p>
     <iron-icon class="refresh" icon="refresh" on-click="refresh"></iron-icon>
   </div>
-  <div class="horizontal center layout main wrap">
+  <div class="horizontal center layout main wrap animated fadeIn">
     <div class="vertical layout weather-text">
       <p class="temperature"><span>{{current_date.currentTemp}}</span>°{{current_date.temperatureUnit}}</p>
       <p class="minmax">
@@ -201,7 +229,7 @@ If lat and lon are no defined. it will try to get your location
     </div>
   </div>
   <div class="separator"></div>
-  <div class="nextDay horizontal layout center-justified wrap">
+  <div class="nextDay horizontal layout center-justified wrap animated fadeIn">
     <template is="dom-repeat" items="{{next_days}}">
       <div class="info">
         <p class="day">{{item.day}}</p>
@@ -397,7 +425,11 @@ Polymer({
       };
       this.push('data',weather);
     }
-    this.current_date = this.data[0];
+    this.set('current_date', null);
+    window.setTimeout(function(){
+      this.set('current_date', this.data[0]);
+    }.bind(this),100);
+    
     // next 3 days
     for (var i=8;i<this.data.length;i=i+8){
       this.push('next_days', this.data[i]);
@@ -430,35 +462,35 @@ Polymer({
     var b = 2;
     var c = 3;
     a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
-    a = a && b? a:c;a = a && b? a:c;a = a && b? a:c
     a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
-    a = a && b? a:c;a = a && b? a:c;a = a && b? a:c
     a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
-    a = a && b? a:c;a = a && b? a:c;a = a && b? a:c
     a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
-    a = a && b? a:c;a = a && b? a:c;a = a && b? a:c
     a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
-    a = a && b? a:c;a = a && b? a:c;a = a && b? a:c
     a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
-    a = a && b? a:c;a = a && b? a:c;a = a && b? a:c
     a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
-    a = a && b? a:c;a = a && b? a:c;a = a && b? a:c
     a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
-    a = a && b? a:c;a = a && b? a:c;a = a && b? a:c
     a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
-    a = a && b? a:c;a = a && b? a:c;a = a && b? a:c
     a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
-    a = a && b? a:c;a = a && b? a:c;a = a && b? a:c
     a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
-    a = a && b? a:c;a = a && b? a:c;a = a && b? a:c
     a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
-    a = a && b? a:c;a = a && b? a:c;a = a && b? a:c
     a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
-    a = a && b? a:c;a = a && b? a:c;a = a && b? a:c
     a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
-    a = a && b? a:c;a = a && b? a:c;a = a && b? a:c
     a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
-    a = a && b? a:c;a = a && b? a:c;a = a && b? a:c
+    a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
+    a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
+    a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
+    a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
+    a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
+    a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
+    a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
+    a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
+    a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
+    a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
+    a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
+    a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
+    a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
+    a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
+    a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
     a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
     a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
     a = a && b? a:c;a = a && b? a:c;a = a && b? a:c;
