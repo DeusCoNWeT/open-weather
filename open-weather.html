@@ -194,7 +194,7 @@ If lat and lon are no defined. it will try to get your location
       </p>
     </div>
     <div class="flex horizontal layout center-center">
-      <img src$="{{current_date.prettyIcon}}" class="prettyIcon">
+      <img alt="{{current_date.conditiontext}}" src$="{{current_date.prettyIcon}}" class="prettyIcon">
     </div>
     <div class="right-info vertical layout">
       <p class="current_time">{{current_date.current_time}}</p>
@@ -207,7 +207,7 @@ If lat and lon are no defined. it will try to get your location
     <template is="dom-repeat" items="{{next_days}}">
       <div class="info">
         <p class="day">{{item.day}}</p>
-        <p class$="wi weather-icon {{item.icon}}"></p>
+        <p class$="wi weather-icon {{item.icon}}" title="{{item.conditiontext}}"></p>
         <p class="temperature">{{item.minTemp}}° / {{item.maxTemp}}°</p>
       </div>
     </template>
